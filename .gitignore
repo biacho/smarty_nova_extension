@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Nova workspace
+.nova/
+
+# Claude Code
+.claude/
+
+# Test files
+test*.tpl
+test*.html
+
+# Node modules (if you ever add build tools)
+node_modules/
+
+# Temporary files
+*.tmp
+*.bak
+*~

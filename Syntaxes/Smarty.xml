@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<syntax name="smarty">
+    <meta>
+        <name>Smarty</name>
+        <type>markup</type>
+        <preferred-file-extension>tpl</preferred-file-extension>
+    </meta>
+
+    <detectors>
+        <extension priority="1.0">tpl</extension>
+    </detectors>
+
+    <indentation>
+        <increase>
+            <expression>\{(if|foreach|for|while|function|block|capture|section|strip|literal)\b</expression>
+        </increase>
+        <decrease>
+            <expression>\{\/(if|foreach|for|while|function|block|capture|section|strip|literal)\}</expression>
+        </decrease>
+    </indentation>
+
+    <comments>
+        <multiline>
+            <starts-with>
+                <expression>\{\*</expression>
+            </starts-with>
+            <ends-with>
+                <expression>\*\}</expression>
+            </ends-with>
+        </multiline>
+    </comments>
+
+    <brackets>
+        <pair open="{" close="}" />
+        <pair open="[" close="]" />
+        <pair open="(" close=")" />
+    </brackets>
+
+    <surrounding-pairs>
+        <pair open="{" close="}" />
+        <pair open="[" close="]" />
+        <pair open="(" close=")" />
+        <pair open="&apos;" close="&apos;" />
+        <pair open="&quot;" close="&quot;" />
+    </surrounding-pairs>
+
+    <scopes>
+        <!-- HTML Comments -->
+        <scope name="html.comment.block">
+            <starts-with>
+                <expression>&lt;!--</expression>
+                <capture number="0" name="html.comment.block.delimiter.open" />
+            </starts-with>
+            <ends-with>
+                <expression>--&gt;</expression>
+                <capture number="0" name="html.comment.block.delimiter.close" />
+            </ends-with>
+        </scope>
+
+        <!-- HTML DOCTYPE -->
+        <scope name="html.processing.doctype">
+            <starts-with>
+                <expression>&lt;!(DOCTYPE|doctype)</expression>
+                <capture number="0" name="html.processing.doctype.delimiter.open" />
+            </starts-with>
+            <ends-with>
+                <expression>&gt;</expression>
+                <capture number="0" name="html.processing.doctype.delimiter.close" />
+            </ends-with>
+        </scope>
+
+        <!-- Script tags with JavaScript -->
+        <scope name="html.tag.script">
+            <starts-with>
+                <expression>(&lt;)(script)\b</expression>
+                <capture number="1" name="html.tag.bracket.open" />
+                <capture number="2" name="html.tag.name" />
+            </starts-with>
+            <ends-with>
+                <expression>(&lt;/)(script)(&gt;)</expression>
+                <capture number="1" name="html.tag.bracket.close.open" />
+                <capture number="2" name="html.tag.name" />
+                <capture number="3" name="html.tag.bracket.close.close" />
+            </ends-with>
+            <subscopes>
+                <scope name="html.tag.attribute">
+                    <expression>\b([a-zA-Z\-:]+)(=)(&quot;[^&quot;]*&quot;|&apos;[^&apos;]*&apos;|[^\s&gt;]+)</expression>
+                    <capture number="1" name="html.tag.attribute.name" />
+                    <capture number="2" name="html.tag.attribute.operator" />
+                    <capture number="3" name="html.tag.attribute.value" />
+                </scope>
+                <scope name="html.tag.bracket.close">
+                    <expression>&gt;</expression>
+                </scope>
+                <include collection="javascript-embedded" />
+            </subscopes>
+        </scope>
+
+        <!-- Style tags with CSS -->
+        <scope name="html.tag.style">
+            <starts-with>
+                <expression>(&lt;)(style)\b</expression>
+                <capture number="1" name="html.tag.bracket.open" />
+                <capture number="2" name="html.tag.name" />
+            </starts-with>
+            <ends-with>
+                <expression>(&lt;/)(style)(&gt;)</expression>
+                <capture number="1" name="html.tag.bracket.close.open" />
+                <capture number="2" name="html.tag.name" />
+                <capture number="3" name="html.tag.bracket.close.close" />
+            </ends-with>
+            <subscopes>
+                <scope name="html.tag.attribute">
+                    <expression>\b([a-zA-Z\-:]+)(=)(&quot;[^&quot;]*&quot;|&apos;[^&apos;]*&apos;|[^\s&gt;]+)</expression>
+                    <capture number="1" name="html.tag.attribute.name" />
+                    <capture number="2" name="html.tag.attribute.operator" />
+                    <capture number="3" name="html.tag.attribute.value" />
+                </scope>
+                <scope name="html.tag.bracket.close">
+                    <expression>&gt;</expression>
+                </scope>
+                <include collection="css-embedded" />
+            </subscopes>
+        </scope>
+
+        <!-- Self-closing tags -->
+        <scope name="html.tag.self-closing">
+            <expression>(&lt;)([a-zA-Z][a-zA-Z0-9\-]*)\b([^&gt;]*?)(/&gt;)</expression>
+            <capture number="1" name="html.tag.bracket.open" />
+            <capture number="2" name="html.tag.name" />
+            <capture number="3" name="html.tag.attributes" />
+            <capture number="4" name="html.tag.bracket.close" />
+        </scope>
+
+        <!-- Opening tags -->
+        <scope name="html.tag.open">
+            <starts-with>
+                <expression>(&lt;)([a-zA-Z][a-zA-Z0-9\-]*)\b</expression>
+                <capture number="1" name="html.tag.bracket.open" />
+                <capture number="2" name="html.tag.name" />
+            </starts-with>
+            <ends-with>
+                <expression>/?&gt;</expression>
+                <capture number="0" name="html.tag.bracket.close" />
+            </ends-with>
+            <subscopes>
+                <!-- Quoted attribute values -->
+                <scope name="html.tag.attribute.quoted">
+                    <expression>\b([a-zA-Z\-:]+)(=)(&quot;|&apos;)</expression>
+                    <capture number="1" name="html.tag.attribute.name" />
+                    <capture number="2" name="html.tag.attribute.operator" />
+                    <capture number="3" name="html.tag.attribute.value.delimiter" />
+                </scope>
+                <!-- Attribute values -->
+                <scope name="html.tag.attribute">
+                    <expression>\b([a-zA-Z\-:]+)(=)([^\s&gt;]+)</expression>
+                    <capture number="1" name="html.tag.attribute.name" />
+                    <capture number="2" name="html.tag.attribute.operator" />
+                    <capture number="3" name="html.tag.attribute.value" />
+                </scope>
+                <!-- Boolean attributes -->
+                <scope name="html.tag.attribute.boolean">
+                    <expression>\b([a-zA-Z\-:]+)(?=\s|&gt;|/&gt;)</expression>
+                    <capture number="1" name="html.tag.attribute.name" />
+                </scope>
+            </subscopes>
+        </scope>
+
+        <!-- Closing tags -->
+        <scope name="html.tag.close">
+            <expression>(&lt;/)([a-zA-Z][a-zA-Z0-9\-]*)(&gt;)</expression>
+            <capture number="1" name="html.tag.bracket.close.open" />
+            <capture number="2" name="html.tag.name" />
+            <capture number="3" name="html.tag.bracket.close.close" />
+        </scope>
+
+        <!-- HTML Entities -->
+        <scope name="html.entity">
+            <expression>&amp;([a-zA-Z]+|#[0-9]+|#[xX][0-9a-fA-F]+);</expression>
+        </scope>
+    </scopes>
+
+    <template-scopes>
+        <!-- Smarty Comments -->
+        <scope name="smarty.comment.block">
+            <starts-with>
+                <expression>\{\{?\*</expression>
+                <capture number="0" name="smarty.comment.block.delimiter.open" />
+            </starts-with>
+            <ends-with>
+                <expression>\*\}\}?</expression>
+                <capture number="0" name="smarty.comment.block.delimiter.close" />
+            </ends-with>
+        </scope>
+
+        <!-- Smarty literal blocks -->
+        <scope name="smarty.block.literal">
+            <starts-with>
+                <expression>(\{\{?)(literal)(\}\}?)</expression>
+                <capture number="1" name="smarty.bracket.tag.open" />
+                <capture number="2" name="smarty.keyword.literal" />
+                <capture number="3" name="smarty.bracket.tag.close" />
+            </starts-with>
+            <ends-with>
+                <expression>(\{\{?/)(literal)(\}\}?)</expression>
+                <capture number="1" name="smarty.bracket.tag.open" />
+                <capture number="2" name="smarty.keyword.literal" />
+                <capture number="3" name="smarty.bracket.tag.close" />
+            </ends-with>
+        </scope>
+
+        <!-- Double braces Smarty tags -->
+        <scope name="smarty.tag.double">
+            <starts-with>
+                <expression>(\{\{/?)(?=[^}\s])</expression>
+                <capture number="1" name="smarty.bracket.tag.open" />
+            </starts-with>
+            <ends-with>
+                <expression>(\}\})</expression>
+                <capture number="1" name="smarty.bracket.tag.close" />
+            </ends-with>
+            <subscopes>
+                <include collection="smarty-expressions" />
+            </subscopes>
+        </scope>
+
+        <!-- Single braces Smarty tags -->
+        <scope name="smarty.tag.single">
+            <starts-with>
+                <expression>(\{/?)(?=[^{}\s])</expression>
+                <capture number="1" name="smarty.bracket.tag.open" />
+            </starts-with>
+            <ends-with>
+                <expression>(\})</expression>
+                <capture number="1" name="smarty.bracket.tag.close" />
+            </ends-with>
+            <subscopes>
+                <include collection="smarty-expressions" />
+            </subscopes>
+        </scope>
+    </template-scopes>
+
+    <collections>
+        <collection name="smarty-expressions">
+            <!-- Control keywords -->
+            <scope name="smarty.keyword.control">
+                <expression>\b(if|elseif|else|foreach|foreachelse|for|while|break|continue|switch|case|default|section|sectionelse)\b</expression>
+            </scope>
+
+            <!-- Built-in functions -->
+            <scope name="smarty.identifier.function.builtin">
+                <expression>\b(assign|append|block|call|capture|config_load|debug|extends|function|include|include_php|insert|ldelim|rdelim|literal|nocache|php|setfilter|strip|html_[a-z_]*)\b</expression>
+            </scope>
+
+            <!-- Custom function calls -->
+            <scope name="smarty.identifier.function.call">
+                <expression>\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\s*\()</expression>
+                <capture number="1" name="smarty.identifier.function.name" />
+            </scope>
+
+            <!-- Boolean constants -->
+            <scope name="smarty.value.boolean">
+                <expression>\b(?i)(true|false|null)\b</expression>
+            </scope>
+
+            <!-- Variable modifiers (filters) -->
+            <scope name="smarty.identifier.function.modifier">
+                <expression>\|(capitalize|cat|count_characters|count_paragraphs|count_sentences|count_words|date_format|default|escape|from_charset|indent|lower|nl2br|regex_replace|replace|spacify|string_format|strip|strip_tags|to_charset|truncate|unescape|upper|wordwrap|counter|cycle|eval|fetch|html_checkboxes|html_image|html_options|html_radios|html_select_date|html_select_time|html_table|mailto|math|textformat)\b</expression>
+            </scope>
+
+            <!-- Custom modifiers -->
+            <scope name="smarty.identifier.function.modifier.custom">
+                <expression>\|([a-zA-Z_][a-zA-Z0-9_]*)</expression>
+                <capture number="1" name="smarty.identifier.function.modifier.name" />
+            </scope>
+
+            <!-- $smarty global variables -->
+            <scope name="smarty.identifier.variable.global">
+                <expression>(\$)(smarty)(\.[a-zA-Z0-9_.]*)?</expression>
+                <capture number="1" name="smarty.operator.variable" />
+                <capture number="2" name="smarty.identifier.variable.global.name" />
+                <capture number="3" name="smarty.identifier.property" />
+            </scope>
+
+            <!-- Method calls -->
+            <scope name="smarty.identifier.method">
+                <expression>(-&gt;)([a-zA-Z_][a-zA-Z0-9_]*)(\()</expression>
+                <capture number="1" name="smarty.operator.accessor" />
+                <capture number="2" name="smarty.identifier.method.name" />
+                <capture number="3" name="smarty.bracket.round.open" />
+            </scope>
+
+            <!-- Property access -->
+            <scope name="smarty.identifier.property">
+                <expression>(-&gt;)([a-zA-Z_][a-zA-Z0-9_]*)</expression>
+                <capture number="1" name="smarty.operator.accessor" />
+                <capture number="2" name="smarty.identifier.property.name" />
+            </scope>
+
+            <!-- Variables with assignment -->
+            <scope name="smarty.identifier.variable.assignment">
+                <expression>(\$)([a-zA-Z_][a-zA-Z0-9_.]*)(\s*)(=)</expression>
+                <capture number="1" name="smarty.operator.variable" />
+                <capture number="2" name="smarty.identifier.variable.name" />
+                <capture number="4" name="smarty.operator.assignment" />
+            </scope>
+
+            <!-- Regular variables -->
+            <scope name="smarty.identifier.variable">
+                <expression>(\$)([a-zA-Z_][a-zA-Z0-9_.]*)</expression>
+                <capture number="1" name="smarty.operator.variable" />
+                <capture number="2" name="smarty.identifier.variable.name" />
+            </scope>
+
+            <!-- Attributes -->
+            <scope name="smarty.identifier.argument">
+                <expression>\b([a-zA-Z_][a-zA-Z0-9_]*)(\s*)(=)</expression>
+                <capture number="1" name="smarty.identifier.argument.name" />
+                <capture number="3" name="smarty.operator.assignment" />
+            </scope>
+
+            <!-- Strings (double-quoted) -->
+            <scope name="smarty.string.double-quoted">
+                <starts-with>
+                    <expression>&quot;</expression>
+                    <capture number="0" name="smarty.string.double-quoted.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>&quot;</expression>
+                    <capture number="0" name="smarty.string.double-quoted.delimiter.close" />
+                </ends-with>
+                <subscopes>
+                    <scope name="smarty.string.escape">
+                        <expression>\\.</expression>
+                    </scope>
+                </subscopes>
+            </scope>
+
+            <!-- Strings (single-quoted) -->
+            <scope name="smarty.string.single-quoted">
+                <starts-with>
+                    <expression>&apos;</expression>
+                    <capture number="0" name="smarty.string.single-quoted.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>&apos;</expression>
+                    <capture number="0" name="smarty.string.single-quoted.delimiter.close" />
+                </ends-with>
+                <subscopes>
+                    <scope name="smarty.string.escape">
+                        <expression>\\.</expression>
+                    </scope>
+                </subscopes>
+            </scope>
+
+            <!-- Operators - Comparison -->
+            <scope name="smarty.operator.comparison">
+                <expression>(===|==|!==|!=|&lt;=&gt;|&lt;=|&gt;=|&lt;|&gt;|&lt;&gt;)</expression>
+            </scope>
+
+            <!-- Operators - Word-based alternates -->
+            <scope name="smarty.operator.word">
+                <expression>\b(eq|ne|neq|gt|lt|gte|lte|ge|le|mod|not|and|or|xor)\b</expression>
+            </scope>
+
+            <!-- Operators - Logical -->
+            <scope name="smarty.operator.logical">
+                <expression>(&amp;&amp;|\|\||!)</expression>
+            </scope>
+
+            <!-- Operators - Assignment -->
+            <scope name="smarty.operator.assignment">
+                <expression>(=|\+=|-=|\*=|/=|%=|&amp;=|\|=|\^=|&lt;&lt;=|&gt;&gt;=|\?\?=)</expression>
+            </scope>
+
+            <!-- Operators - Arithmetic -->
+            <scope name="smarty.operator.arithmetic">
+                <expression>(\+\+|--|[+\-*/%])</expression>
+            </scope>
+
+            <!-- Operators - Ternary -->
+            <scope name="smarty.operator.ternary">
+                <expression>(\?|:)</expression>
+            </scope>
+
+            <!-- Numbers - Hex -->
+            <scope name="smarty.value.number.hex">
+                <expression>\b0[xX][0-9a-fA-F]+\b</expression>
+            </scope>
+
+            <!-- Numbers - Binary -->
+            <scope name="smarty.value.number.binary">
+                <expression>\b0[bB][01]+\b</expression>
+            </scope>
+
+            <!-- Numbers - Octal -->
+            <scope name="smarty.value.number.octal">
+                <expression>\b0[0-7]+\b</expression>
+            </scope>
+
+            <!-- Numbers - Float -->
+            <scope name="smarty.value.number.float">
+                <expression>\b[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?\b</expression>
+            </scope>
+
+            <!-- Numbers - Integer -->
+            <scope name="smarty.value.number.integer">
+                <expression>\b[0-9]+\b</expression>
+            </scope>
+
+            <!-- Array brackets -->
+            <scope name="smarty.bracket.square">
+                <expression>[\[\]]</expression>
+            </scope>
+
+            <!-- Parentheses -->
+            <scope name="smarty.bracket.round">
+                <expression>[()]</expression>
+            </scope>
+        </collection>
+
+        <!-- JavaScript Embedded Syntax -->
+        <collection name="javascript-embedded">
+            <!-- Single line comments -->
+            <scope name="javascript.comment.line">
+                <expression>//.*$</expression>
+            </scope>
+
+            <!-- Multi-line comments -->
+            <scope name="javascript.comment.block">
+                <starts-with>
+                    <expression>/\*</expression>
+                    <capture number="0" name="javascript.comment.block.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>\*/</expression>
+                    <capture number="0" name="javascript.comment.block.delimiter.close" />
+                </ends-with>
+            </scope>
+
+            <!-- Template literals -->
+            <scope name="javascript.string.template">
+                <starts-with>
+                    <expression>`</expression>
+                    <capture number="0" name="javascript.string.template.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>`</expression>
+                    <capture number="0" name="javascript.string.template.delimiter.close" />
+                </ends-with>
+                <subscopes>
+                    <scope name="javascript.string.escape">
+                        <expression>\\.</expression>
+                    </scope>
+                    <scope name="javascript.string.template.expression">
+                        <starts-with>
+                            <expression>\$\{</expression>
+                        </starts-with>
+                        <ends-with>
+                            <expression>\}</expression>
+                        </ends-with>
+                    </scope>
+                </subscopes>
+            </scope>
+
+            <!-- Double-quoted strings -->
+            <scope name="javascript.string.double-quoted">
+                <starts-with>
+                    <expression>"</expression>
+                    <capture number="0" name="javascript.string.double-quoted.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>"</expression>
+                    <capture number="0" name="javascript.string.double-quoted.delimiter.close" />
+                </ends-with>
+                <subscopes>
+                    <scope name="javascript.string.escape">
+                        <expression>\\.</expression>
+                    </scope>
+                </subscopes>
+            </scope>
+
+            <!-- Single-quoted strings -->
+            <scope name="javascript.string.single-quoted">
+                <starts-with>
+                    <expression>'</expression>
+                    <capture number="0" name="javascript.string.single-quoted.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>'</expression>
+                    <capture number="0" name="javascript.string.single-quoted.delimiter.close" />
+                </ends-with>
+                <subscopes>
+                    <scope name="javascript.string.escape">
+                        <expression>\\.</expression>
+                    </scope>
+                </subscopes>
+            </scope>
+
+            <!-- Regular expressions -->
+            <scope name="javascript.regex">
+                <expression>/(?![*/])([^/\n\r\\]|\\.)+/[gimsuvy]*</expression>
+            </scope>
+
+            <!-- Keywords -->
+            <scope name="javascript.keyword">
+                <expression>\b(async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|var|void|while|with|yield)\b</expression>
+            </scope>
+
+            <!-- Boolean and null -->
+            <scope name="javascript.value.boolean">
+                <expression>\b(true|false|null|undefined|NaN|Infinity)\b</expression>
+            </scope>
+
+            <!-- Numbers -->
+            <scope name="javascript.value.number">
+                <expression>\b(0[xX][0-9a-fA-F]+|0[oO][0-7]+|0[bB][01]+|[0-9]+\.?[0-9]*([eE][+-]?[0-9]+)?)\b</expression>
+            </scope>
+
+            <!-- Function calls -->
+            <scope name="javascript.identifier.function">
+                <expression>\b([a-zA-Z_$][a-zA-Z0-9_$]*)(?=\s*\()</expression>
+            </scope>
+
+            <!-- Operators -->
+            <scope name="javascript.operator">
+                <expression>(===|!==|==|!=|&lt;=|&gt;=|&lt;&lt;|&gt;&gt;|&amp;&amp;|\|\||[+\-*/%&lt;&gt;&amp;|\^!~?:=])</expression>
+            </scope>
+
+            <!-- Brackets -->
+            <scope name="javascript.bracket">
+                <expression>[(){}\[\]]</expression>
+            </scope>
+        </collection>
+
+        <!-- CSS Embedded Syntax -->
+        <collection name="css-embedded">
+            <!-- Multi-line comments -->
+            <scope name="css.comment.block">
+                <starts-with>
+                    <expression>/\*</expression>
+                    <capture number="0" name="css.comment.block.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>\*/</expression>
+                    <capture number="0" name="css.comment.block.delimiter.close" />
+                </ends-with>
+            </scope>
+
+            <!-- CSS Rules -->
+            <scope name="css.rule">
+                <starts-with>
+                    <expression>([.#]?[-\w]+(?:\s*,\s*[.#]?[-\w]+)*)\s*\{</expression>
+                    <capture number="1" name="css.selector" />
+                </starts-with>
+                <ends-with>
+                    <expression>\}</expression>
+                </ends-with>
+                <subscopes>
+                    <include collection="css-properties" />
+                </subscopes>
+            </scope>
+
+            <include collection="css-properties" />
+        </collection>
+
+        <!-- CSS Properties -->
+        <collection name="css-properties">
+            <!-- Strings -->
+            <scope name="css.string.double-quoted">
+                <starts-with>
+                    <expression>"</expression>
+                    <capture number="0" name="css.string.double-quoted.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>"</expression>
+                    <capture number="0" name="css.string.double-quoted.delimiter.close" />
+                </ends-with>
+            </scope>
+
+            <scope name="css.string.single-quoted">
+                <starts-with>
+                    <expression>'</expression>
+                    <capture number="0" name="css.string.single-quoted.delimiter.open" />
+                </starts-with>
+                <ends-with>
+                    <expression>'</expression>
+                    <capture number="0" name="css.string.single-quoted.delimiter.close" />
+                </ends-with>
+            </scope>
+
+            <!-- Important -->
+            <scope name="css.important">
+                <expression>!important\b</expression>
+            </scope>
+
+            <!-- URLs -->
+            <scope name="css.function.url">
+                <expression>\b(url)\s*\([^)]*\)</expression>
+                <capture number="1" name="css.function.name" />
+            </scope>
+
+            <!-- Functions -->
+            <scope name="css.function">
+                <expression>\b(rgb|rgba|hsl|hsla|calc|var|linear-gradient|radial-gradient|repeating-linear-gradient|repeating-radial-gradient|rotate|scale|translate|skew|matrix)(?=\s*\()</expression>
+            </scope>
+
+            <!-- Colors (hex) -->
+            <scope name="css.value.color.hex">
+                <expression>#[0-9a-fA-F]{3,8}\b</expression>
+            </scope>
+
+            <!-- Numbers with units -->
+            <scope name="css.value.number.unit">
+                <expression>\b([0-9]+\.?[0-9]*)(px|em|rem|vh|vw|vmin|vmax|%|pt|pc|in|cm|mm|ex|ch|deg|rad|grad|turn|s|ms|fr)\b</expression>
+                <capture number="1" name="css.value.number" />
+                <capture number="2" name="css.value.unit" />
+            </scope>
+
+            <!-- Numbers -->
+            <scope name="css.value.number">
+                <expression>\b[0-9]+\.?[0-9]*\b</expression>
+            </scope>
+
+            <!-- Property names -->
+            <scope name="css.property">
+                <expression>\b(color|background|background-color|background-image|background-position|background-repeat|background-size|border|border-radius|border-color|border-width|border-style|margin|margin-top|margin-right|margin-bottom|margin-left|padding|padding-top|padding-right|padding-bottom|padding-left|width|height|min-width|min-height|max-width|max-height|display|position|top|right|bottom|left|float|clear|overflow|overflow-x|overflow-y|z-index|font|font-family|font-size|font-weight|font-style|line-height|text-align|text-decoration|text-transform|text-indent|letter-spacing|word-spacing|white-space|opacity|visibility|cursor|transform|transition|animation|flex|flex-direction|flex-wrap|justify-content|align-items|align-content|grid|grid-template-columns|grid-template-rows|gap|box-shadow|text-shadow|filter|content)(?=\s*:)</expression>
+            </scope>
+
+            <!-- Property values -->
+            <scope name="css.value.keyword">
+                <expression>\b(none|auto|inherit|initial|unset|block|inline|inline-block|flex|grid|absolute|relative|fixed|sticky|static|left|right|center|justify|bold|normal|italic|underline|uppercase|lowercase|capitalize|hidden|visible|pointer|default|solid|dashed|dotted|double|transparent|currentColor)\b</expression>
+            </scope>
+
+            <!-- Colon -->
+            <scope name="css.operator">
+                <expression>[:;]</expression>
+            </scope>
+        </collection>
+    </collections>
+</syntax>
