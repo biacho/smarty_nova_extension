@@ -1,3 +1,7 @@
+## Version 1.0.4
+
+- Fixing HTML tag closing
+
 ## Version 1.0.3
 
 - Improved description with keywords for better searchability (tpl, PHP, templating)

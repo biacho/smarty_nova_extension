@@ -83,8 +83,45 @@
                 <capture number="3" name="html.tag.bracket.close.close" />
             </ends-with>
             <subscopes>
-                <scope name="html.tag.attribute">
-                    <expression>\b([a-zA-Z\-:]+)(=)(&quot;[^&quot;]*&quot;|&apos;[^&apos;]*&apos;|[^\s&gt;]+)</expression>
+                <!-- Double-quoted attributes -->
+                <scope name="html.tag.attribute.double-quoted">
+                    <starts-with>
+                        <expression>\b([a-zA-Z\-:]+)(=)(&quot;)</expression>
+                        <capture number="1" name="html.tag.attribute.name" />
+                        <capture number="2" name="html.tag.attribute.operator" />
+                        <capture number="3" name="html.tag.attribute.value.delimiter.open" />
+                    </starts-with>
+                    <ends-with>
+                        <expression>(&quot;)</expression>
+                        <capture number="1" name="html.tag.attribute.value.delimiter.close" />
+                    </ends-with>
+                    <subscopes>
+                        <scope name="html.tag.attribute.value">
+                            <expression>[^&quot;]+</expression>
+                        </scope>
+                    </subscopes>
+                </scope>
+                <!-- Single-quoted attributes -->
+                <scope name="html.tag.attribute.single-quoted">
+                    <starts-with>
+                        <expression>\b([a-zA-Z\-:]+)(=)(&apos;)</expression>
+                        <capture number="1" name="html.tag.attribute.name" />
+                        <capture number="2" name="html.tag.attribute.operator" />
+                        <capture number="3" name="html.tag.attribute.value.delimiter.open" />
+                    </starts-with>
+                    <ends-with>
+                        <expression>(&apos;)</expression>
+                        <capture number="1" name="html.tag.attribute.value.delimiter.close" />
+                    </ends-with>
+                    <subscopes>
+                        <scope name="html.tag.attribute.value">
+                            <expression>[^&apos;]+</expression>
+                        </scope>
+                    </subscopes>
+                </scope>
+                <!-- Unquoted attributes -->
+                <scope name="html.tag.attribute.unquoted">
+                    <expression>\b([a-zA-Z\-:]+)(=)([^\s&gt;&quot;&apos;]+)</expression>
                     <capture number="1" name="html.tag.attribute.name" />
                     <capture number="2" name="html.tag.attribute.operator" />
                     <capture number="3" name="html.tag.attribute.value" />
@@ -110,8 +147,45 @@
                 <capture number="3" name="html.tag.bracket.close.close" />
             </ends-with>
             <subscopes>
-                <scope name="html.tag.attribute">
-                    <expression>\b([a-zA-Z\-:]+)(=)(&quot;[^&quot;]*&quot;|&apos;[^&apos;]*&apos;|[^\s&gt;]+)</expression>
+                <!-- Double-quoted attributes -->
+                <scope name="html.tag.attribute.double-quoted">
+                    <starts-with>
+                        <expression>\b([a-zA-Z\-:]+)(=)(&quot;)</expression>
+                        <capture number="1" name="html.tag.attribute.name" />
+                        <capture number="2" name="html.tag.attribute.operator" />
+                        <capture number="3" name="html.tag.attribute.value.delimiter.open" />
+                    </starts-with>
+                    <ends-with>
+                        <expression>(&quot;)</expression>
+                        <capture number="1" name="html.tag.attribute.value.delimiter.close" />
+                    </ends-with>
+                    <subscopes>
+                        <scope name="html.tag.attribute.value">
+                            <expression>[^&quot;]+</expression>
+                        </scope>
+                    </subscopes>
+                </scope>
+                <!-- Single-quoted attributes -->
+                <scope name="html.tag.attribute.single-quoted">
+                    <starts-with>
+                        <expression>\b([a-zA-Z\-:]+)(=)(&apos;)</expression>
+                        <capture number="1" name="html.tag.attribute.name" />
+                        <capture number="2" name="html.tag.attribute.operator" />
+                        <capture number="3" name="html.tag.attribute.value.delimiter.open" />
+                    </starts-with>
+                    <ends-with>
+                        <expression>(&apos;)</expression>
+                        <capture number="1" name="html.tag.attribute.value.delimiter.close" />
+                    </ends-with>
+                    <subscopes>
+                        <scope name="html.tag.attribute.value">
+                            <expression>[^&apos;]+</expression>
+                        </scope>
+                    </subscopes>
+                </scope>
+                <!-- Unquoted attributes -->
+                <scope name="html.tag.attribute.unquoted">
+                    <expression>\b([a-zA-Z\-:]+)(=)([^\s&gt;&quot;&apos;]+)</expression>
                     <capture number="1" name="html.tag.attribute.name" />
                     <capture number="2" name="html.tag.attribute.operator" />
                     <capture number="3" name="html.tag.attribute.value" />
@@ -144,20 +218,52 @@
                 <capture number="0" name="html.tag.bracket.close" />
             </ends-with>
             <subscopes>
-                <!-- Quoted attribute values -->
-                <scope name="html.tag.attribute.quoted">
-                    <expression>\b([a-zA-Z\-:]+)(=)(&quot;|&apos;)</expression>
-                    <capture number="1" name="html.tag.attribute.name" />
-                    <capture number="2" name="html.tag.attribute.operator" />
-                    <capture number="3" name="html.tag.attribute.value.delimiter" />
+                <!-- Double-quoted attributes -->
+                <scope name="html.tag.attribute.double-quoted">
+                    <starts-with>
+                        <expression>\b([a-zA-Z\-:]+)(=)(&quot;)</expression>
+                        <capture number="1" name="html.tag.attribute.name" />
+                        <capture number="2" name="html.tag.attribute.operator" />
+                        <capture number="3" name="html.tag.attribute.value.delimiter.open" />
+                    </starts-with>
+                    <ends-with>
+                        <expression>(&quot;)</expression>
+                        <capture number="1" name="html.tag.attribute.value.delimiter.close" />
+                    </ends-with>
+                    <subscopes>
+                        <scope name="html.tag.attribute.value">
+                            <expression>[^&quot;]+</expression>
+                        </scope>
+                    </subscopes>
                 </scope>
-                <!-- Attribute values -->
-                <scope name="html.tag.attribute">
-                    <expression>\b([a-zA-Z\-:]+)(=)([^\s&gt;]+)</expression>
+
+                <!-- Single-quoted attributes -->
+                <scope name="html.tag.attribute.single-quoted">
+                    <starts-with>
+                        <expression>\b([a-zA-Z\-:]+)(=)(&apos;)</expression>
+                        <capture number="1" name="html.tag.attribute.name" />
+                        <capture number="2" name="html.tag.attribute.operator" />
+                        <capture number="3" name="html.tag.attribute.value.delimiter.open" />
+                    </starts-with>
+                    <ends-with>
+                        <expression>(&apos;)</expression>
+                        <capture number="1" name="html.tag.attribute.value.delimiter.close" />
+                    </ends-with>
+                    <subscopes>
+                        <scope name="html.tag.attribute.value">
+                            <expression>[^&apos;]+</expression>
+                        </scope>
+                    </subscopes>
+                </scope>
+
+                <!-- Unquoted attribute values -->
+                <scope name="html.tag.attribute.unquoted">
+                    <expression>\b([a-zA-Z\-:]+)(=)([^\s&gt;&quot;&apos;]+)</expression>
                     <capture number="1" name="html.tag.attribute.name" />
                     <capture number="2" name="html.tag.attribute.operator" />
                     <capture number="3" name="html.tag.attribute.value" />
                 </scope>
+
                 <!-- Boolean attributes -->
                 <scope name="html.tag.attribute.boolean">
                     <expression>\b([a-zA-Z\-:]+)(?=\s|&gt;|/&gt;)</expression>
