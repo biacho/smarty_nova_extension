@@ -2,7 +2,7 @@
   "identifier": "coderium.Smarty",
   "name": "Smarty Templates",
   "organization": "Coderium",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Syntax highlighting for Smarty template files (.tpl) with support for HTML, CSS, and JavaScript. Perfect for PHP templating.",
   "author": "Coderium",
   "license": "MIT",

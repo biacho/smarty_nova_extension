@@ -2,6 +2,8 @@
 
 **Smarty Templates** provides comprehensive syntax highlighting for Smarty template files (.tpl) in Nova.
 
+<img width="644" height="732" alt="image" src="https://github.com/user-attachments/assets/2cc8ebd8-7322-4f9b-b621-5af0f5e7ad7b" />
+
 
 ## Features
 

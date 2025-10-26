@@ -1,5 +1,9 @@
 ## Version 1.0.4
 
+- Update image in README for Smarty Templates
+
+## Version 1.0.4
+
 - Fixing HTML tag closing
 
 ## Version 1.0.3
