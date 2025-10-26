@@ -1,3 +1,7 @@
+## Version 1.0.3
+
+- Improved description with keywords for better searchability (tpl, PHP, templating)
+
 ## Version 1.0.2
 
 - Updated homepage link to Coderium website
